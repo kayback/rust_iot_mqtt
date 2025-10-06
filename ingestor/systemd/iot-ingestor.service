@@ -1,0 +1,32 @@
+[Unit]
+Description=Rust IoT Ingestor
+After=network-online.target postgresql.service mosquitto.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/ingestor
+Environment=MQTT_BROKER=localhost
+Environment=MQTT_PORT=1883
+Environment=DATABASE_URL=postgres://iot:pass@localhost:5432/iotdb
+Environment=HTTP_ADDR=0.0.0.0:8080
+Environment=BATCH_SIZE=2000
+Environment=BATCH_TIMEOUT_MS=50
+Environment=CHANNEL_CAPACITY=50000
+Environment=RUST_LOG=info
+User=ingestor
+Group=ingestor
+Restart=on-failure
+RestartSec=5
+LimitNOFILE=1048576
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/log/ingestor
+
+[Install]
+WantedBy=multi-user.target
+
